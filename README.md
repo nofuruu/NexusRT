@@ -680,25 +680,10 @@ Priority: LOW
 - [ ] Sanitize file uploads
 - [ ] Add audit logging
 
----
-
-## 📞 Kontak & Support
-
-**Penguji**: Rizal Faizal - Manajer Departemen IT Development
-
-**Email**:
-- faizal@jagoanhosting.com
-- galang@jagoanhosting.com
-
-**WhatsApp**: +6282244124300 (Jam kerja saja)
-
-**Deadline**: 5 hari sejak menerima soal (lebih cepat lebih baik)
-
----
 
 ## 📄 Lisensi
 
-Proprietary - © 2025 Jagoan Hosting
+github : @nofuruu
 
 ---
 
