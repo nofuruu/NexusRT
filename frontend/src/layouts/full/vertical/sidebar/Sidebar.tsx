@@ -32,9 +32,9 @@ const renderSidebarItems = (
     const IconComp = item.icon || null;
 
     const iconElement = IconComp ? (
-      <Icon icon={IconComp} height={21} width={21} />
+      <Icon icon={IconComp} height={24} width={24} />
     ) : (
-      <Icon icon={'ri:checkbox-blank-circle-line'} height={9} width={9} />
+      <Icon icon={'ri:checkbox-blank-circle-line'} height={12} width={12} />
     );
 
     // Heading
@@ -115,7 +115,7 @@ const SidebarLayout = ({ onClose }: { onClose?: () => void }) => {
     >
       {/* Logo */}
       <div className="items-center brand-logo overflow-hidden flex items-center gap-3 px-6 py-4">
-        <AMLogo component={Link} href="/" img="">
+        <AMLogo component={Link} href="/dashboard" img="">
           <div className="flex items-center gap-3">
             <FullLogo />
             <span className="text-2xl font-bold dark:text-sidebar-foreground text-sidebar-foreground">
@@ -141,7 +141,6 @@ const SidebarLayout = ({ onClose }: { onClose?: () => void }) => {
               )}
             </div>
           ))}
-
         </div>
       </SimpleBar>
     </AMSidebar>

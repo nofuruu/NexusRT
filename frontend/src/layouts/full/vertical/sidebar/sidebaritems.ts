@@ -40,7 +40,7 @@ const SidebarContent: MenuItem[] = [
         name: 'Dashboard',
         icon: 'solar:widget-2-linear',
         id: uniqueId(),
-        url: '/',
+        url: '/dashboard',
         isPro: false,
       },
     ],
@@ -108,20 +108,6 @@ const SidebarContent: MenuItem[] = [
       },
     ],
   },
-  {
-    heading: 'Icons',
-    children: [
-      {
-        id: uniqueId(),
-        name: 'Iconify Icons',
-        icon: 'solar:structure-linear',
-        url: '/icons/iconify',
-        isPro: false,
-      },
-    ],
-  },
-
- 
 ];
 
 export default SidebarContent;

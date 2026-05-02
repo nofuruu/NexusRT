@@ -88,9 +88,6 @@ const AuthLogin = () => {
               Ingat Saya
             </Label>
           </div>
-          <Link to={'/'} className="text-primary text-sm font-medium">
-            Lupa Password ?
-          </Link>
         </div>
 
         <Button type="submit" className="w-full" disabled={isLoading}>
