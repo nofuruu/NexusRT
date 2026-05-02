@@ -1,31 +1,41 @@
-import inertia from '@inertiajs/vite';
-import { wayfinder } from '@laravel/vite-plugin-wayfinder';
-import tailwindcss from '@tailwindcss/vite';
-import react from '@vitejs/plugin-react';
-import laravel from 'laravel-vite-plugin';
-import { bunny } from 'laravel-vite-plugin/fonts';
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
+import fs from 'fs/promises';
+import svgr from '@svgr/rollup';
 
+// https://vitejs.dev/config/
 export default defineConfig({
-    plugins: [
-        laravel({
-            input: ['resources/css/app.css', 'resources/js/app.tsx'],
-            refresh: true,
-            fonts: [
-                bunny('Instrument Sans', {
-                    weights: [400, 500, 600],
-                }),
+    resolve: {
+        alias: {
+            src: resolve(__dirname, 'src'),
+        },
+    },
+    esbuild: {
+        loader: 'tsx',
+        include: /src\/.*\.tsx?$/,
+        exclude: [],
+    },
+    optimizeDeps: {
+        esbuildOptions: {
+            plugins: [
+                {
+                    name: 'load-js-files-as-tsx',
+                    setup(build) {
+                        build.onLoad(
+                            { filter: /src\\.*\.js$/ },
+                            async (args) => ({
+                                loader: 'tsx',
+                                contents: await fs.readFile(args.path, 'utf8'),
+                            })
+                        );
+                    },
+                },
             ],
-        }),
-        inertia(),
-        react({
-            babel: {
-                plugins: ['babel-plugin-react-compiler'],
-            },
-        }),
-        tailwindcss(),
-        wayfinder({
-            formVariants: true,
-        }),
-    ],
+        },
+    },
+    build: {
+        outDir: 'dist', // ✅ this is required for Netlify
+    },
+    plugins: [svgr(), react()],
 });
