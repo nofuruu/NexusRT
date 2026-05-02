@@ -1,8 +1,19 @@
-
 export const Footer = () => {
-    return (
-        <>
-            <p className="text-base text-center text-bodytext font-medium">Design and Developed by <a href="https://tailwind-admin.com/" target="_blank" className="text-primary font-normal underline hover:text-primaryemphasis" >tailwind-admin.com</a> </p>
-        </>
-    )
-}
+  const currentYear = new Date().getFullYear();
+
+  return (
+    <>
+      <p className="text-base text-center text-bodytext font-medium mt-4">
+        © {currentYear}{' '}
+        <span className="font-semibold">
+          Nexus<span className="text-primary">RT</span>
+        </span>
+        . Designed & Developed by{' '}
+        <span className="text-primary font-medium hover:text-primaryemphasis cursor-pointer">
+          nofuruu
+        </span>{' '}
+        untuk Skill Fit Test.
+      </p>
+    </>
+  );
+};

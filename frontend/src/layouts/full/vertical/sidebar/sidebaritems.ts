@@ -32,9 +32,8 @@ export interface MenuItem {
 import { uniqueId } from 'lodash';
 
 const SidebarContent: MenuItem[] = [
-  // ==================== NON-PRO SECTIONS ====================
   {
-    heading: 'Home',
+    heading: 'Beranda',
     children: [
       {
         name: 'Dashboard',
@@ -45,66 +44,60 @@ const SidebarContent: MenuItem[] = [
       },
     ],
   },
-
   {
-    heading: 'pages',
+    heading: 'Master Data',
     children: [
       {
-        name: 'Tables',
-        icon: 'solar:server-linear',
+        name: 'Data Rumah',
+        icon: 'solar:home-2-linear', // Ikon rumah
         id: uniqueId(),
-        url: '/utilities/table',
+        url: '/master/rumah',
+        isPro: false,
       },
       {
-        name: 'Form',
-        icon: 'solar:document-add-linear',
+        name: 'Data Penghuni',
+        icon: 'solar:users-group-rounded-linear', // Ikon grup orang/warga
         id: uniqueId(),
-        url: '/utilities/form',
-      },
-      {
-        id: uniqueId(),
-        name: 'User Profile',
-        icon: 'solar:user-circle-linear',
-        url: '/user-profile',
+        url: '/master/penghuni',
         isPro: false,
       },
     ],
   },
   {
-    heading: 'Apps',
+    heading: 'Administrasi',
+    children: [
+      {
+        name: 'Penerimaan Iuran',
+        icon: 'solar:wallet-money-linear', // Ikon dompet untuk iuran masuk
+        id: uniqueId(),
+        url: '/administrasi/iuran',
+        isPro: false,
+      },
+      {
+        name: 'Pengeluaran RT',
+        icon: 'solar:card-send-linear', // Ikon kartu untuk pengeluaran
+        id: uniqueId(),
+        url: '/administrasi/pengeluaran',
+        isPro: false,
+      },
+      {
+        name: 'Laporan Keuangan',
+        icon: 'solar:document-text-linear', // Ikon dokumen untuk report
+        id: uniqueId(),
+        url: '/administrasi/laporan',
+        isPro: false,
+      },
+    ],
+  },
+  {
+    heading: 'Pengaturan',
     children: [
       {
         id: uniqueId(),
-        name: 'Notes',
-        icon: 'solar:notes-linear',
-        url: '/apps/notes',
+        name: 'Profil Akun',
+        icon: 'solar:user-circle-linear',
+        url: '/user-profile',
         isPro: false,
-      },
-      {
-        id: uniqueId(),
-        name: 'Tickets',
-        icon: 'solar:ticker-star-linear',
-        url: '/apps/tickets',
-        isPro: false,
-      },
-      {
-        name: 'Blogs',
-        id: uniqueId(),
-        icon: 'solar:sort-by-alphabet-linear',
-        children: [
-          {
-            id: uniqueId(),
-            name: 'Blog Post',
-            url: '/apps/blog/post',
-            isPro: false,
-          },
-          {
-            id: uniqueId(),
-            name: 'Blog Detail',
-            url: '/apps/blog/detail/streaming-video-way-before-it-was-cool-go-dark-tomorrow',
-            isPro: false,
-          },
-        ],
       },
     ],
   },

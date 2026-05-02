@@ -11,7 +11,8 @@ import {
 import { ApexOptions } from 'apexcharts';
 
 const RevenueUpdate = () => {
-  const [selectedMonth, setSelectedMonth] = useState('Year 2025');
+  const currentYear = new Date().getFullYear().toString();
+  const [selectedYear, setSelectedYear] = useState(`Tahun ${currentYear}`);
 
   // Strongly typed chart data
   interface MonthlyChartData {
@@ -19,89 +20,52 @@ const RevenueUpdate = () => {
     xaxis: ApexOptions['xaxis'];
   }
 
+  // Data Mockup - Nantinya data ini dihasilkan dari Backend (SUM Iuran per bulan)
+  // Nilai di sini adalah representasi Ribuan Rupiah. Contoh: 1500 = Rp 1.500.000
   const chartDataByMonth: Record<string, MonthlyChartData> = {
-    'Year 2025': {
+    'Tahun 2026': {
       series: [
         {
-          name: 'Earnings',
+          name: 'Pemasukan',
           data: [1500, 2700, 2200, 3000, 1500, 1000, 1400, 2400, 1900, 2300, 1400, 1100],
         },
         {
-          name: 'Expense',
+          name: 'Pengeluaran',
           data: [-1800, -1100, -2500, -1500, -600, -1800, -1200, -2300, -1900, -2300, -1200, -2500],
         },
       ],
       xaxis: {
-        categories: [
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec',
-        ],
+        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'],
       },
     },
-    'Year 2024': {
+    'Tahun 2025': {
       series: [
         {
-          name: 'Earnings',
+          name: 'Pemasukan',
           data: [2000, 2500, 2800, 3000, 2000, 1500, 2300, 1500, 1000, 1400, 2400, 1900],
         },
         {
-          name: 'Expense',
+          name: 'Pengeluaran',
           data: [-1200, -1500, -2000, -1000, -800, -1300, -1500, -600, -1800, -1200, -2300, -1900],
         },
       ],
       xaxis: {
-        categories: [
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec',
-        ],
+        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'],
       },
     },
-    'Year 2023': {
+    'Tahun 2024': {
       series: [
         {
-          name: 'Earnings',
+          name: 'Pemasukan',
           data: [1800, 2200, 2600, 3000, 1700, 1200, 2000, 2500, 2800, 1800, 2000, 1500],
         },
         {
-          name: 'Expense',
+          name: 'Pengeluaran',
           data: [-1500, -1300, -2200, -1200, -700, -1600, -1200, -1500, -2000, -1000, -800, -1300],
         },
       ],
       xaxis: {
-        categories: [
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec',
-        ],
+        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'],
       },
     },
   };
@@ -117,7 +81,7 @@ const RevenueUpdate = () => {
       width: '100%',
       offsetX: -20,
     },
-    colors: ['var(--color-primary)', 'var(--color-secondary)'],
+    colors: ['var(--color-primary)', 'var(--color-error)'], // Menggunakan warna merah (error) untuk pengeluaran
     plotOptions: {
       bar: {
         horizontal: false,
@@ -129,7 +93,10 @@ const RevenueUpdate = () => {
       },
     },
     dataLabels: { enabled: false },
-    legend: { show: false },
+    legend: { 
+      show: true, // Menampilkan legenda Pemasukan vs Pengeluaran agar RT tidak bingung
+      position: 'bottom',
+    },
     grid: {
       borderColor: 'rgba(0,0,0,0.1)',
       strokeDashArray: 3,
@@ -140,7 +107,12 @@ const RevenueUpdate = () => {
       tickAmount: 6,
       labels: {
         formatter: (val: number) => {
-          return `${val / 1000}k`;
+          // Menyesuaikan label agar menjadi "1.5 Jt" atau "500 Rb" dll
+          if (val === 0) return '0';
+          const isNegative = val < 0;
+          const absVal = Math.abs(val);
+          const formatted = absVal >= 1000 ? `${absVal / 1000} Jt` : `${absVal} Rb`;
+          return isNegative ? `-${formatted}` : formatted;
         },
       },
     },
@@ -148,7 +120,9 @@ const RevenueUpdate = () => {
       theme: 'dark',
       y: {
         formatter: (val: number) => {
-          return `${val}k`;
+          // Tooltip menunjukkan nilai Rupiah utuh
+          const absoluteVal = Math.abs(val) * 1000;
+          return `Rp ${absoluteVal.toLocaleString('id-ID')}`;
         },
       },
     },
@@ -157,7 +131,7 @@ const RevenueUpdate = () => {
   const ChartData: ApexOptions = {
     ...baseChartOptions,
     xaxis: {
-      ...chartDataByMonth[selectedMonth].xaxis,
+      ...chartDataByMonth[selectedYear].xaxis,
       axisBorder: { show: false },
       axisTicks: { show: false },
     },
@@ -168,30 +142,31 @@ const RevenueUpdate = () => {
       <CardBox className="pb-0 h-full w-full">
         <div className="sm:flex items-center justify-between mb-6">
           <div>
-            <h5 className="card-title">Revenue updates</h5>
+            <h5 className="card-title">Grafik Keuangan</h5>
             <p className="text-sm text-muted-foreground font-normal">
-              Overview of Profit
+              Ringkasan Pemasukan & Pengeluaran RT
             </p>
           </div>
           <div className="sm:mt-0 mt-4">
             <Select
-              value={selectedMonth}
-              onValueChange={(val) => setSelectedMonth(val as keyof typeof chartDataByMonth)}
+              value={selectedYear}
+              onValueChange={(val) => setSelectedYear(val as keyof typeof chartDataByMonth)}
             >
               <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Select Year" />
+                <SelectValue placeholder="Pilih Tahun" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Year 2025">Year 2025</SelectItem>
-                <SelectItem value="Year 2024">Year 2024</SelectItem>
-                <SelectItem value="Year 2023">Year 2023</SelectItem>
+                {/* Looping keys dari object data agar select option selalu sinkron */}
+                {Object.keys(chartDataByMonth).map((year) => (
+                   <SelectItem key={year} value={year}>{year}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         </div>
         <Chart
           options={ChartData}
-          series={chartDataByMonth[selectedMonth].series}
+          series={chartDataByMonth[selectedYear].series}
           type="bar"
           height="316px"
           width={'100%'}
@@ -200,4 +175,5 @@ const RevenueUpdate = () => {
     </>
   );
 };
+
 export { RevenueUpdate };

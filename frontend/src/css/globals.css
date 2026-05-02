@@ -17,6 +17,8 @@ main {
 
 body {
   font-family: 'DM Sans', sans-serif;
+  zoom: 80%;
+  transform-origin: top left;
 }
 
 @theme {
