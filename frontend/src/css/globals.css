@@ -10,15 +10,14 @@
 
 @custom-variant dark (&:is(.dark *));
 
-html,
-main {
+html {
   scroll-behavior: smooth;
+  font-size: 80%; 
 }
 
 body {
   font-family: 'DM Sans', sans-serif;
-  zoom: 80%;
-  transform-origin: top left;
+  /* HAPUS zoom dan transform-origin di sini */
 }
 
 @theme {

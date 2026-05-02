@@ -15,9 +15,9 @@ const FullLogo = () => {
 
     <>
       {/* Dark Logo   */}
-      <img src={Logo} alt="logo" className="block dark:hidden rtl:scale-x-[-1] w-20 h-auto" />
+      <img src={Logo} alt="logo" className="block dark:hidden rtl:scale-x-[-1] w-15 h-auto" />
       {/* Light Logo  */}
-      <img src={Logowhite} alt="logo" className="hidden dark:block rtl:scale-x-[-1] w-20 h-auto" />
+      <img src={Logowhite} alt="logo" className="hidden dark:block rtl:scale-x-[-1] w-15 h-auto" />
     </>
   );
 };

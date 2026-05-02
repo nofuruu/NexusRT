@@ -33,10 +33,10 @@ const ProfileWelcome = () => {
             {isLoading ? (
               'Memuat data...'
             ) : (
-              `Welcome back! ${user?.name || 'Admin'} 👋`
+              `Selamat Datang Kembali, ${user?.name || 'Admin'} 👋`
             )}
           </h5>
-          <p className="text-muted-foreground">Check your reports</p>
+          <p className="text-muted-foreground">Cek Laporan Perumahan Disini</p>
         </div>
       </div>
 

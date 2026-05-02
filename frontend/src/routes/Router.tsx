@@ -19,6 +19,15 @@ const Maintainance = Loadable(lazy(() => import('../views/authentication/Maintai
 // Dashboards
 const Modern = Loadable(lazy(() => import('../views/dashboards/Modern')));
 
+// Master Data 
+const DataRumah = Loadable(lazy(() => import('../views/pages/master/DataRumah'))); 
+const DataPenghuni = Loadable(lazy(() => import('../views/pages/master/DataPenghuni')));
+
+// Transaction
+const PenerimaanIuran = Loadable(lazy(() => import('../views/pages/administrasi/PenerimaanIuran')));
+const PengeluaranRt = Loadable(lazy(() => import('../views/pages/administrasi/PengeluaranRT')));
+const LaporanKeuangan = Loadable(lazy(() => import('../views/pages/administrasi/LaporanKeungan')));
+
 //pages
 const UserProfile = Loadable(lazy(() => import('../views/pages/user-profile/UserProfile')));
 
@@ -45,7 +54,14 @@ const Router = [
     children: [
       { path: '/', exact: true, element: <Navigate to="/auth/auth2/login" /> },
       // { path: '/', exact: true, element: <SamplePage /> },
+
+
       { path: '/dashboard', element: <Modern /> },
+      { path: '/master/rumah', element: <DataRumah /> },
+      { path: '/master/penghuni', element: <DataPenghuni /> },
+      { path: '/administrasi/iuran', element: <PenerimaanIuran /> }, 
+      { path: '/administrasi/pengeluaran', element: <PengeluaranRt /> },
+      { path: '/administrasi/laporan', element: <LaporanKeuangan /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
 
       { path: '/apps/notes', element: <Notes /> },

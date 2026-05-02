@@ -2,7 +2,7 @@ import SidebarContent from './sidebaritems';
 import SimpleBar from 'simplebar-react';
 import { Icon } from '@iconify/react';
 import FullLogo from '../../shared/logo/FullLogo';
-import { Link, useLocation } from 'react-router-dom'; // Pastikan menggunakan react-router-dom
+import { Link, useLocation } from 'react-router-dom'; 
 import { useTheme } from 'src/components/provider/theme-provider';
 import { AMLogo, AMMenu, AMMenuItem, AMSidebar, AMSubmenu } from 'tailwind-sidebar';
 import 'tailwind-sidebar/styles.css';
@@ -25,7 +25,6 @@ const renderSidebarItems = (
   isSubItem: boolean = false,
 ) => {
   return items.map((item) => {
-    // Memberikan key yang lebih aman
     const key = item.id || item.heading || item.name;
     const isSelected = currentPath === item?.url;
     const IconComp = item.icon || null;
@@ -62,7 +61,6 @@ const renderSidebarItems = (
       );
     }
 
-    // Regular menu item
     const linkTarget = item.url?.startsWith('https') ? '_blank' : '_self';
 
     const itemClassNames = isSubItem
@@ -106,14 +104,11 @@ const SidebarLayout = ({ onClose }: { onClose?: () => void }) => {
       width={'260px'}
       showTrigger={false}
       mode={sidebarMode}
-      // Ubah 'border border-border' menjadi 'border-r border-border' untuk mencegah garis bawah
       className="fixed left-0 top-0 border-r border-border dark:border-border bg-sidebar dark:bg-sidebar z-10 h-screen"
     >
-      {/* Menggunakan Flexbox column agar tinggi layout dinamis menyesuaikan zoom 80% */}
       <div className="flex flex-col h-full">
         
-        {/* Logo - shrink-0 agar tidak mengecil saat menu penuh */}
-        <div className="shrink-0 items-center brand-logo overflow-hidden flex gap-3 px-6 py-4">
+        <div className="shrink-0 items-center brand-logo overflow-hidden flex gap-2 px-4">
           <AMLogo component={Link} href="/dashboard" img="">
             <div className="flex items-center gap-3">
               <FullLogo />
@@ -124,7 +119,6 @@ const SidebarLayout = ({ onClose }: { onClose?: () => void }) => {
           </AMLogo>
         </div>
 
-        {/* Sidebar items - flex-1 min-h-0 menggantikan calc(100vh-100px) untuk menghindari bug sub-pixel */}
         <SimpleBar className="flex-1 min-h-0">
           <div className="px-5 py-2">
             {SidebarContent.map((section, index) => (

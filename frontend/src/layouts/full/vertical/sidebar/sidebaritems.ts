@@ -49,7 +49,7 @@ const SidebarContent: MenuItem[] = [
     children: [
       {
         name: 'Data Rumah',
-        icon: 'solar:home-2-linear', // Ikon rumah
+        icon: 'solar:home-2-linear', 
         id: uniqueId(),
         url: '/master/rumah',
         isPro: false,
