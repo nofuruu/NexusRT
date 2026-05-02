@@ -1,10 +1,7 @@
-import { Link } from "react-router";
-import CardBox from "src/components/shared/CardBox";
-
-import AuthLogin from "../authforms/AuthLogin";
-
-import FullLogo from "src/layouts/full/shared/logo/FullLogo";
-
+import { Link } from 'react-router-dom'; // Sebaiknya gunakan react-router-dom
+import CardBox from 'src/components/shared/CardBox';
+import AuthLogin from '../authforms/AuthLogin';
+import FullLogo from 'src/layouts/full/shared/logo/FullLogo';
 
 const Login = () => {
   return (
@@ -20,13 +17,12 @@ const Login = () => {
                 </span>
               </div>
             </div>
+
             <AuthLogin />
+
             <div className="flex gap-2 text-base text-ld font-medium mt-6 items-center justify-center">
               <p>Belum memiliki akun?</p>
-              <Link
-                to={"/auth/auth2/register"}
-                className="text-primary text-sm font-medium"
-              >
+              <Link to={'/auth/auth2/register'} className="text-primary text-sm font-medium">
                 Registrasi
               </Link>
             </div>

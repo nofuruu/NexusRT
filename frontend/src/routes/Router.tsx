@@ -43,7 +43,7 @@ const Router = [
     path: '/',
     element: <FullLayout />,
     children: [
-      { path: '/', exact: true, element: <Modern /> },
+      { path: '/', exact: true, element: <Navigate to="/auth/auth2/login" /> },
       // { path: '/', exact: true, element: <SamplePage /> },
       { path: '*', element: <Navigate to="/auth/404" /> },
 
