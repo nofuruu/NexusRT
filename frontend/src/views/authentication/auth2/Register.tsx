@@ -1,4 +1,4 @@
-import { Link } from 'react-router';
+import { Link } from 'react-router-dom';
 import CardBox from 'src/components/shared/CardBox';
 
 import AuthRegister from '../authforms/AuthRegister';
