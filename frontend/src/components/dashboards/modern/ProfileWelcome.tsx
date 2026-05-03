@@ -32,7 +32,7 @@ const ProfileWelcome = () => {
           <h5 className="card-title">
             {isLoading ? (
               'Memuat data...'
-            ) : (
+              ) : (
               `Selamat Datang Kembali, ${user?.name || 'Admin'} 👋`
             )}
           </h5>

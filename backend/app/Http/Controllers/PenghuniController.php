@@ -52,8 +52,19 @@ class PenghuniController extends Controller
     public function destroy($id)
     {
         $penghuni = Penghuni::findOrFail($id);
-        $penghuni->delete();
 
-        return response()->json(['message' => 'Penghuni berhasil dihapus']);
+        try {
+            $penghuni->delete();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Data penghuni berhasil dihapus.'
+            ]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Penghuni ini tidak bisa dihapus karena masih tercatat menempati rumah. Kosongkan rumahnya terlebih dahulu.'
+            ], 400);
+        }
     }
 }

@@ -1,133 +1,157 @@
-import { Icon } from "@iconify/react/dist/iconify.js"
+import { Icon } from "@iconify/react/dist/iconify.js";
 import { useState, useEffect } from "react";
 import BreadcrumbComp from "src/layouts/full/shared/breadcrumb/BreadcrumbComp";
 import CardBox from "src/components/shared/CardBox";
-import profileImg from "src/assets/images/profile/user-1.jpg"
+import profileImg from "src/assets/images/profile/user-1.jpg";
 import { Button } from "src/components/ui/button";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "src/components/ui/dialog";
 import { Label } from "src/components/ui/label";
 import { Input } from "src/components/ui/input";
+import axiosInstance from 'src/api/axios';
 
 const UserProfile = () => {
     const [openModal, setOpenModal] = useState(false);
     const [modalType, setModalType] = useState<"personal" | "address" | null>(null);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    // State profile disamakan persis dengan field database Laravel
+    const [profile, setProfile] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        position: "",
+        nik: "",
+        location: "",
+        block: "",
+        rt_rw: "",
+        village: "",
+        city: ""
+    });
+
+    const [tempProfile, setTempProfile] = useState(profile);
 
     const BCrumb = [
-        {
-            to: "/",
-            title: "Home",
-        },
-        {
-            title: "Userprofile",
-        },
+        { to: "/", title: "Home" },
+        { title: "Profil Pengurus" },
     ];
 
-    const [personal, setPersonal] = useState({
-        firstName: "Mathew",
-        lastName: "Anderson",
-        email: "mathew.anderson@gmail.com",
-        phone: "(347) 528-1947",
-        position: "Team Leader",
-        facebook: "https://www.facebook.com/wrappixel",
-        twitter: "https://twitter.com/wrappixel",
-        github: "https://github.com/wrappixel",
-        dribbble: "https://dribbble.com/wrappixel"
-    });
-
-    const [address, setAddress] = useState({
-        location: "United States",
-        state: "San Diego, California, United States",
-        pin: "92101",
-        zip: "30303",
-        taxNo: "GA45273910"
-    });
-
-    const [tempPersonal, setTempPersonal] = useState(personal);
-    const [tempAddress, setTempAddress] = useState(address);
-
+    // Mengambil data dari API saat halaman dimuat
     useEffect(() => {
-        if (openModal && modalType === "personal") {
-            setTempPersonal(personal);
-        }
-        if (openModal && modalType === "address") {
-            setTempAddress(address);
-        }
-    }, [openModal, modalType, personal, address]);
+        const fetchProfile = async () => {
+            try {
+                const response = await axiosInstance.get('/profile');
+                // Laravel mengirimkan data di dalam property 'data'
+                const userData = response.data.data; 
+                
+                // Mengubah null menjadi string kosong agar input React tidak error (uncontrolled input)
+                const safeData = Object.keys(userData).reduce((acc, key) => {
+                    acc[key] = userData[key] === null ? "" : userData[key];
+                    return acc;
+                }, {} as any);
 
-    const handleSave = () => {
-        if (modalType === "personal") {
-            setPersonal(tempPersonal);
-        } else if (modalType === "address") {
-            setAddress(tempAddress);
+                setProfile(safeData);
+            } catch (error) {
+                console.error("Gagal mengambil data profil", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProfile();
+    }, []);
+
+    // Set temp data saat modal dibuka
+    useEffect(() => {
+        if (openModal) {
+            setTempProfile(profile);
         }
-        setOpenModal(false);
+    }, [openModal, profile]);
+
+    const handleSave = async () => {
+        setIsSaving(true);
+        try {
+            // Mengirim data ke Laravel menggunakan metode PUT
+            const response = await axiosInstance.put('/profile', tempProfile);
+            
+            // Update state UI dengan data terbaru dari server
+            setProfile(response.data.data);
+            setOpenModal(false);
+        } catch (error) {
+            console.error("Gagal menyimpan data:", error);
+            alert("Gagal menyimpan perubahan. Periksa koneksi atau input Anda.");
+        } finally {
+            setIsSaving(false);
+        }
     };
 
-    const socialLinks = [
-        { href: "https://www.facebook.com/wrappixel", icon: "streamline-logos:facebook-logo-2-solid" },
-        { href: "https://twitter.com/wrappixel", icon: "streamline-logos:x-twitter-logo-solid" },
-        { href: "https://github.com/wrappixel", icon: "ion:logo-github" },
-        { href: "https://dribbble.com/wrappixel", icon: "streamline-flex:dribble-logo-remix" },
-    ];
+    if (isLoading) {
+        return <div className="flex justify-center items-center h-screen"><Icon icon="solar:spinner-linear" className="animate-spin text-4xl text-primary" /></div>;
+    }
 
     return (
         <>
-            <BreadcrumbComp title="User Profile" items={BCrumb} />
+            <BreadcrumbComp title="Profil Pengurus" items={BCrumb} />
             <div className="flex flex-col gap-6">
                 <CardBox className="p-6 overflow-hidden">
                     <div className="flex flex-col sm:flex-row items-center gap-6 rounded-xl relative w-full break-words">
                         <div>
-                            <img src={profileImg} alt="image" width={80} height={80} className="rounded-full" />
+                            <img src={profileImg} alt="image" width={80} height={80} className="rounded-full ring-4 ring-primary/20" />
                         </div>
                         <div className="flex flex-wrap gap-4 justify-center sm:justify-between items-center w-full">
                             <div className="flex flex-col sm:text-left text-center gap-1.5">
-                                <h5 className="card-title">{personal.firstName} {personal.lastName}</h5>
-                                <div className="flex flex-wrap items-center gap-1 md:gap-3">
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">{personal.position}</p>
+                                <h5 className="card-title text-xl">{profile.name}</h5>
+                                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 md:gap-3">
+                                    <span className="px-2 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-md uppercase tracking-wider">
+                                        {profile.position || 'Belum diatur'}
+                                    </span>
                                     <div className="hidden h-4 w-px bg-gray-300 dark:bg-gray-700 xl:block"></div>
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">{address.location}</p>
+                                    <p className="text-sm text-muted-foreground flex items-center gap-1">
+                                        <Icon icon="solar:map-point-outline" /> {profile.location || 'Alamat belum diatur'}
+                                    </p>
                                 </div>
-                            </div>
-                            <div className="flex items-center gap-2">
-                                {socialLinks.map((item, index) => (
-                                    <a key={index} href={item.href} target="_blank" className="flex h-11 w-11 items-center justify-center gap-2 rounded-full shadow-md border border-ld hover:bg-gray-50 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
-                                        <Icon icon={item.icon} width="20" height="20" />
-                                    </a>
-                                ))}
                             </div>
                         </div>
                     </div>
                 </CardBox>
 
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-                    <CardBox className="p-6 overflow-hidden">
-                        <h5 className="card-title mb-6">Personal Information</h5>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-7 2xl:gap-x-32 mb-6">
-                            <div><p className="text-xs text-gray-500">First Name</p><p>{personal.firstName}</p></div>
-                            <div><p className="text-xs text-gray-500">Last Name</p><p>{personal.lastName}</p></div>
-                            <div><p className="text-xs text-gray-500">Email</p><p>{personal.email}</p></div>
-                            <div><p className="text-xs text-gray-500">Phone</p><p>{personal.phone}</p></div>
-                            <div><p className="text-xs text-gray-500">Position</p><p>{personal.position}</p></div>
+                    <CardBox className="p-6 overflow-hidden h-full flex flex-col justify-between">
+                        <div>
+                            <h5 className="card-title mb-6 flex items-center gap-2">
+                                <Icon icon="solar:user-id-outline" className="text-primary text-xl" /> Data Pribadi
+                            </h5>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-6">
+                                <div><p className="text-xs text-muted-foreground">Nama Lengkap</p><p className="font-medium">{profile.name}</p></div>
+                                <div><p className="text-xs text-muted-foreground">NIK</p><p className="font-medium">{profile.nik || '-'}</p></div>
+                                <div><p className="text-xs text-muted-foreground">Email</p><p className="font-medium">{profile.email}</p></div>
+                                <div><p className="text-xs text-muted-foreground">No. HP / WhatsApp</p><p className="font-medium">{profile.phone || '-'}</p></div>
+                                <div><p className="text-xs text-muted-foreground">Jabatan Kepengurusan</p><p className="font-medium">{profile.position || '-'}</p></div>
+                            </div>
                         </div>
-                        <div className="flex justify-end">
-                            <Button onClick={() => { setModalType("personal"); setOpenModal(true); }} color={"primary"} className="flex items-center gap-1.5 rounded-md">
-                                <Icon icon="ic:outline-edit" width="18" height="18" /> Edit
+                        <div className="flex justify-end border-t pt-4 mt-auto">
+                            <Button onClick={() => { setModalType("personal"); setOpenModal(true); }} className="flex items-center gap-2">
+                                <Icon icon="solar:pen-new-square-outline" width="18" /> Edit Data
                             </Button>
                         </div>
                     </CardBox>
 
-                    <CardBox className="p-6 overflow-hidden">
-                        <h5 className="card-title mb-6">Address Details</h5>
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-7 2xl:gap-x-32 mb-6">
-                            <div><p className="text-xs text-gray-500">Location</p><p>{address.location}</p></div>
-                            <div><p className="text-xs text-gray-500">Province / State</p><p>{address.state}</p></div>
-                            <div><p className="text-xs text-gray-500">PIN Code</p><p>{address.pin}</p></div>
-                            <div><p className="text-xs text-gray-500">ZIP</p><p>{address.zip}</p></div>
-                            <div><p className="text-xs text-gray-500">Federal Tax No.</p><p>{address.taxNo}</p></div>
+                    <CardBox className="p-6 overflow-hidden h-full flex flex-col justify-between">
+                        <div>
+                            <h5 className="card-title mb-6 flex items-center gap-2">
+                                <Icon icon="solar:home-angle-outline" className="text-primary text-xl" /> Domisili / Alamat
+                            </h5>
+                            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 mb-6">
+                                <div><p className="text-xs text-muted-foreground">Perumahan / Wilayah</p><p className="font-medium">{profile.location || '-'}</p></div>
+                                <div><p className="text-xs text-muted-foreground">Blok / Nomor</p><p className="font-medium">{profile.block || '-'}</p></div>
+                                <div><p className="text-xs text-muted-foreground">RT / RW</p><p className="font-medium">{profile.rt_rw || '-'}</p></div>
+                                <div><p className="text-xs text-muted-foreground">Kelurahan</p><p className="font-medium">{profile.village || '-'}</p></div>
+                                <div><p className="text-xs text-muted-foreground">Kota / Kabupaten</p><p className="font-medium">{profile.city || '-'}</p></div>
+                            </div>
                         </div>
-                        <div className="flex justify-end">
-                            <Button onClick={() => { setModalType("address"); setOpenModal(true); }} color={"primary"} className="flex items-center gap-1.5 rounded-md">
-                                <Icon icon="ic:outline-edit" width="18" height="18" /> Edit
+                        <div className="flex justify-end border-t pt-4 mt-auto">
+                            <Button onClick={() => { setModalType("address"); setOpenModal(true); }} className="flex items-center gap-2">
+                                <Icon icon="solar:pen-new-square-outline" width="18" /> Edit Alamat
                             </Button>
                         </div>
                     </CardBox>
@@ -137,151 +161,72 @@ const UserProfile = () => {
             <Dialog open={openModal} onOpenChange={setOpenModal}>
                 <DialogContent className="max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle className="mb-4">
-                            {modalType === "personal" ? "Edit Personal Information" : "Edit Address Details"}
+                        <DialogTitle className="mb-4 text-xl">
+                            {modalType === "personal" ? "Edit Data Pribadi" : "Edit Domisili"}
                         </DialogTitle>
                     </DialogHeader>
 
                     {modalType === "personal" ? (
                         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                            <div className="flex flex-col gap-2">
-                                <Label htmlFor="firstName">First Name</Label>
-                                <Input
-                                    id="firstName"
-                                    placeholder="First Name"
-                                    value={tempPersonal.firstName}
-                                    onChange={(e) => setTempPersonal({ ...tempPersonal, firstName: e.target.value })}
-                                />
+                            <div className="flex flex-col gap-2 lg:col-span-2">
+                                <Label htmlFor="name">Nama Lengkap</Label>
+                                <Input id="name" value={tempProfile.name} onChange={(e) => setTempProfile({ ...tempProfile, name: e.target.value })} />
                             </div>
                             <div className="flex flex-col gap-2">
-                                <Label htmlFor="lastName">Last Name</Label>
-                                <Input
-                                    id="lastName"
-                                    placeholder="Last Name"
-                                    value={tempPersonal.lastName}
-                                    onChange={(e) => setTempPersonal({ ...tempPersonal, lastName: e.target.value })}
-                                />
+                                <Label htmlFor="nik">NIK (Nomor Induk Kependudukan)</Label>
+                                <Input id="nik" value={tempProfile.nik} onChange={(e) => setTempProfile({ ...tempProfile, nik: e.target.value })} />
                             </div>
                             <div className="flex flex-col gap-2">
-                                <Label htmlFor="email">Email</Label>
-                                <Input
-                                    id="email"
-                                    placeholder="Email"
-                                    value={tempPersonal.email}
-                                    onChange={(e) => setTempPersonal({ ...tempPersonal, email: e.target.value })}
-                                />
+                                <Label htmlFor="position">Jabatan (Admin/RT/RW)</Label>
+                                <Input id="position" value={tempProfile.position} onChange={(e) => setTempProfile({ ...tempProfile, position: e.target.value })} />
+                            </div>
+                            {/* Email dinonaktifkan editnya untuk keamanan login */}
+                            <div className="flex flex-col gap-2">
+                                <Label htmlFor="email">Email Sistem</Label>
+                                <Input id="email" type="email" value={tempProfile.email} disabled className="bg-gray-100 cursor-not-allowed" />
                             </div>
                             <div className="flex flex-col gap-2">
-                                <Label htmlFor="phone">Phone</Label>
-                                <Input
-                                    id="phone"
-                                    placeholder="Phone"
-                                    value={tempPersonal.phone}
-                                    onChange={(e) => setTempPersonal({ ...tempPersonal, phone: e.target.value })}
-                                />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <Label htmlFor="position">Position</Label>
-                                <Input
-                                    id="position"
-                                    placeholder="Position"
-                                    value={tempPersonal.position}
-                                    onChange={(e) => setTempPersonal({ ...tempPersonal, position: e.target.value })}
-                                />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <Label htmlFor="facebook">Facebook URL</Label>
-                                <Input
-                                    id="facebook"
-                                    placeholder="Facebook URL"
-                                    value={tempPersonal.facebook}
-                                    onChange={(e) => setTempPersonal({ ...tempPersonal, facebook: e.target.value })}
-                                />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <Label htmlFor="twitter">Twitter URL</Label>
-                                <Input
-                                    id="twitter"
-                                    placeholder="Twitter URL"
-                                    value={tempPersonal.twitter}
-                                    onChange={(e) => setTempPersonal({ ...tempPersonal, twitter: e.target.value })}
-                                />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <Label htmlFor="github">GitHub URL</Label>
-                                <Input
-                                    id="github"
-                                    placeholder="GitHub URL"
-                                    value={tempPersonal.github}
-                                    onChange={(e) => setTempPersonal({ ...tempPersonal, github: e.target.value })}
-                                />
-                            </div>
-                            <div className="flex flex-col gap-2">
-                                <Label htmlFor="dribbble">Dribbble URL</Label>
-                                <Input
-                                    id="dribbble"
-                                    placeholder="Dribbble URL"
-                                    value={tempPersonal.dribbble}
-                                    onChange={(e) => setTempPersonal({ ...tempPersonal, dribbble: e.target.value })}
-                                />
+                                <Label htmlFor="phone">No. WhatsApp</Label>
+                                <Input id="phone" value={tempProfile.phone} onChange={(e) => setTempProfile({ ...tempProfile, phone: e.target.value })} />
                             </div>
                         </div>
                     ) : (
                         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                            <div className="flex flex-col gap-2">
-                                <Label htmlFor="location">Location</Label>
-                                <Input
-                                    id="location"
-                                    placeholder="Location"
-                                    value={tempAddress.location}
-                                    onChange={(e) => setTempAddress({ ...tempAddress, location: e.target.value })}
-                                />
+                            <div className="flex flex-col gap-2 lg:col-span-2">
+                                <Label htmlFor="location">Nama Perumahan / Wilayah</Label>
+                                <Input id="location" value={tempProfile.location} onChange={(e) => setTempProfile({ ...tempProfile, location: e.target.value })} />
                             </div>
                             <div className="flex flex-col gap-2">
-                                <Label htmlFor="state">Province / State</Label>
-                                <Input
-                                    id="state"
-                                    placeholder="Province / State"
-                                    value={tempAddress.state}
-                                    onChange={(e) => setTempAddress({ ...tempAddress, state: e.target.value })}
-                                />
+                                <Label htmlFor="block">Blok / Nomor Rumah</Label>
+                                <Input id="block" value={tempProfile.block} onChange={(e) => setTempProfile({ ...tempProfile, block: e.target.value })} />
                             </div>
                             <div className="flex flex-col gap-2">
-                                <Label htmlFor="pin">PIN Code</Label>
-                                <Input
-                                    id="pin"
-                                    placeholder="PIN Code"
-                                    value={tempAddress.pin}
-                                    onChange={(e) => setTempAddress({ ...tempAddress, pin: e.target.value })}
-                                />
+                                <Label htmlFor="rt_rw">RT / RW</Label>
+                                <Input id="rt_rw" value={tempProfile.rt_rw} onChange={(e) => setTempProfile({ ...tempProfile, rt_rw: e.target.value })} />
                             </div>
                             <div className="flex flex-col gap-2">
-                                <Label htmlFor="zip">ZIP</Label>
-                                <Input
-                                    id="zip"
-                                    placeholder="ZIP"
-                                    value={tempAddress.zip}
-                                    onChange={(e) => setTempAddress({ ...tempAddress, zip: e.target.value })}
-                                />
+                                <Label htmlFor="village">Kelurahan / Desa</Label>
+                                <Input id="village" value={tempProfile.village} onChange={(e) => setTempProfile({ ...tempProfile, village: e.target.value })} />
                             </div>
                             <div className="flex flex-col gap-2">
-                                <Label htmlFor="taxNo">Federal Tax No.</Label>
-                                <Input
-                                    id="taxNo"
-                                    placeholder="Federal Tax No."
-                                    value={tempAddress.taxNo}
-                                    onChange={(e) => setTempAddress({ ...tempAddress, taxNo: e.target.value })}
-                                />
+                                <Label htmlFor="city">Kota / Kabupaten</Label>
+                                <Input id="city" value={tempProfile.city} onChange={(e) => setTempProfile({ ...tempProfile, city: e.target.value })} />
                             </div>
                         </div>
                     )}
 
-                    <DialogFooter className="flex gap-2 mt-4">
-                        <Button color={"primary"} className="rounded-md" onClick={handleSave}>
-                            Save Changes
+                    <DialogFooter className="flex gap-2 mt-6">
+                        <Button variant="outline" onClick={() => setOpenModal(false)} disabled={isSaving}>
+                            Batal
                         </Button>
-                        <Button color={"lighterror"} className="rounded-md bg-lighterror dark:bg-darkerror text-error hover:bg-error hover:text-white" onClick={() => setOpenModal(false)}>
-                            Close
+                        <Button onClick={handleSave} disabled={isSaving}>
+                            {isSaving ? (
+                                <>
+                                    <Icon icon="solar:spinner-linear" className="mr-2 animate-spin" /> Menyimpan...
+                                </>
+                            ) : (
+                                "Simpan Perubahan"
+                            )}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

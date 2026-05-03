@@ -14,6 +14,9 @@ const AuthLogin = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
+  // State baru untuk fitur Show Password
+  const [showPassword, setShowPassword] = useState(false);
+
   const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -74,7 +77,8 @@ const AuthLogin = () => {
           </div>
           <Input
             id="userpwd"
-            type="password"
+            // Logika ternary untuk mengubah tipe input
+            type={showPassword ? 'text' : 'password'}
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -83,9 +87,14 @@ const AuthLogin = () => {
 
         <div className="flex justify-between my-5">
           <div className="flex items-center gap-2">
-            <Checkbox id="accept" className="checkbox" />
+            <Checkbox
+              id="accept"
+              className="checkbox"
+              checked={showPassword}
+              onCheckedChange={(checked) => setShowPassword(checked === true)}
+            />
             <Label htmlFor="accept" className="opacity-90 font-normal cursor-pointer">
-              Ingat Saya
+              Show Password
             </Label>
           </div>
         </div>

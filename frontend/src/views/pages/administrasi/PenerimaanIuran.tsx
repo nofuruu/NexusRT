@@ -6,14 +6,21 @@ import { Button } from 'src/components/ui/button';
 
 const PenerimaanIuran = () => {
   const [dataPemasukan, setDataPemasukan] = useState([]);
-  const [dataRumah, setDataRumah] = useState([]); // Untuk dropdown pilihan rumah
+  const [dataRumah, setDataRumah] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
 
-  // === STATE MODAL FORM PEMBAYARAN ===
+  // === STATE MODAL FORM (TAMBAH & EDIT) ===
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editId, setEditId] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [modalError, setModalError] = useState('');
+
+  // === STATE MODAL HAPUS ===
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [deleteData, setDeleteData] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Default Form: Bulan dan Tahun saat ini
   const today = new Date();
@@ -22,8 +29,8 @@ const PenerimaanIuran = () => {
 
   const [formData, setFormData] = useState({
     rumah_id: '',
-    jenis_iuran: 'Satpam', // Default
-    skema_bayar: 'Bulanan', // Default
+    jenis_iuran: 'Satpam',
+    skema_bayar: 'Bulanan',
     bulan: currentMonth,
     tahun: currentYear,
     tanggal_bayar: today.toISOString().split('T')[0],
@@ -60,8 +67,10 @@ const PenerimaanIuran = () => {
     setFormData({ ...formData, [name]: value });
   };
 
-  // === FUNGSI BUKA MODAL ===
-  const handleOpenModal = () => {
+  // === FUNGSI BUKA MODAL TAMBAH ===
+  const handleOpenAddModal = () => {
+    setIsEditMode(false);
+    setEditId(null);
     setModalError('');
     setFormData({
       rumah_id: '',
@@ -74,21 +83,64 @@ const PenerimaanIuran = () => {
     setIsModalOpen(true);
   };
 
-  // === FUNGSI SUBMIT PEMBAYARAN ===
+  // === FUNGSI BUKA MODAL EDIT (KOREKSI) ===
+  const handleOpenEditModal = (item) => {
+    setIsEditMode(true);
+    setEditId(item.id);
+    setModalError('');
+    setFormData({
+      rumah_id: item.rumah_id,
+      jenis_iuran: item.jenis_iuran,
+      skema_bayar: item.skema_bayar || 'Bulanan', // Default fallback
+      bulan: item.bulan,
+      tahun: item.tahun,
+      tanggal_bayar: item.tanggal_bayar,
+    });
+    setIsModalOpen(true);
+  };
+
+  // === FUNGSI BUKA MODAL HAPUS ===
+  const handleOpenDeleteModal = (item) => {
+    setDeleteData(item);
+    setIsDeleteModalOpen(true);
+  };
+
+  // === FUNGSI SUBMIT (TAMBAH & EDIT) ===
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     setModalError('');
 
     try {
-      await axiosInstance.post('/keuangan/pemasukan', formData);
+      if (isEditMode) {
+        await axiosInstance.put(`/keuangan/pemasukan/${editId}`, formData);
+      } else {
+        await axiosInstance.post('/keuangan/pemasukan', formData);
+      }
       setIsModalOpen(false);
-      fetchData(); // Refresh tabel setelah sukses
+      fetchData();
     } catch (error) {
       console.error('Gagal memproses pembayaran:', error);
       setModalError(error.response?.data?.message || 'Terjadi kesalahan pada server.');
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // === FUNGSI HAPUS DATA ===
+  const handleDelete = async () => {
+    if (!deleteData) return;
+    setIsDeleting(true);
+    try {
+      await axiosInstance.delete(`/keuangan/pemasukan/${deleteData.id}`);
+      setIsDeleteModalOpen(false);
+      setDeleteData(null);
+      fetchData();
+    } catch (error) {
+      console.error('Gagal menghapus data:', error);
+      alert(error.response?.data?.message || 'Gagal menghapus data. Periksa koneksi Anda.');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -124,7 +176,7 @@ const PenerimaanIuran = () => {
           <div>
             <h5 className="card-title text-lg font-bold">Penerimaan Iuran Warga</h5>
             <p className="text-sm text-muted-foreground font-normal mt-1">
-              Catat dan pantau pembayaran iuran Satpam & Kebersihan bulanan
+              Catat dan pantau pembayaran iuran bulanan warga
             </p>
           </div>
           <div className="mt-4 sm:mt-0 flex gap-2">
@@ -132,7 +184,7 @@ const PenerimaanIuran = () => {
               <Icon icon="solar:refresh-linear" width="18" />
               Refresh
             </Button>
-            <Button onClick={handleOpenModal} className="flex items-center gap-2">
+            <Button onClick={handleOpenAddModal} className="flex items-center gap-2">
               <Icon icon="solar:wallet-money-linear" width="18" />
               Terima Iuran
             </Button>
@@ -151,18 +203,19 @@ const PenerimaanIuran = () => {
                 <th className="px-6 py-4 font-semibold text-sm">Jenis Iuran</th>
                 <th className="px-6 py-4 font-semibold text-sm">Untuk Bulan</th>
                 <th className="px-6 py-4 font-semibold text-sm">Nominal</th>
+                <th className="px-6 py-4 font-semibold text-sm text-center">Aksi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border dark:divide-darkborder">
               {isLoading ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-8 text-center text-muted-foreground">
+                  <td colSpan="6" className="px-6 py-8 text-center text-muted-foreground">
                     Memuat data...
                   </td>
                 </tr>
               ) : dataPemasukan.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-8 text-center text-muted-foreground">
+                  <td colSpan="6" className="px-6 py-8 text-center text-muted-foreground">
                     Belum ada transaksi pembayaran.
                   </td>
                 </tr>
@@ -170,7 +223,7 @@ const PenerimaanIuran = () => {
                 dataPemasukan.map((item) => (
                   <tr key={item.id} className="hover:bg-muted/50 transition-colors">
                     <td className="px-6 py-4 text-sm text-foreground">{item.tanggal_bayar}</td>
-                    <td className="px-6 py-4 text-sm font-bold text-foreground dark:text-white">
+                    <td className="px-6 py-4 text-sm font-bold text-foreground">
                       {item.rumah?.nomor_rumah || '-'}
                     </td>
                     <td className="px-6 py-4">
@@ -190,6 +243,27 @@ const PenerimaanIuran = () => {
                     <td className="px-6 py-4 text-sm font-semibold text-success dark:text-green-400">
                       + {formatRupiah(item.jumlah_bayar)}
                     </td>
+                    <td className="px-6 py-4 text-sm flex justify-center gap-1">
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-primary hover:bg-primary/10"
+                        onClick={() => handleOpenEditModal(item)}
+                        title="Koreksi Data"
+                      >
+                        <Icon icon="solar:pen-linear" width="18" />
+                      </Button>
+                      <div className="w-px h-6 bg-border mx-1 self-center"></div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-error hover:bg-error/10"
+                        onClick={() => handleOpenDeleteModal(item)}
+                        title="Hapus Data"
+                      >
+                        <Icon icon="solar:trash-bin-trash-outline" width="18" />
+                      </Button>
+                    </td>
                   </tr>
                 ))
               )}
@@ -198,12 +272,14 @@ const PenerimaanIuran = () => {
         </div>
       </CardBox>
 
-      {/* === MODAL TERIMA IURAN === */}
+      {/* === MODAL TERIMA & EDIT IURAN === */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <CardBox className="w-full max-w-lg p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+          <CardBox className="w-full max-w-lg p-6 shadow-xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-bold text-foreground">Penerimaan Iuran Baru</h3>
+              <h3 className="text-lg font-bold text-foreground">
+                {isEditMode ? 'Koreksi Data Iuran' : 'Penerimaan Iuran Baru'}
+              </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
                 className="text-muted-foreground hover:text-foreground"
@@ -228,13 +304,17 @@ const PenerimaanIuran = () => {
                   name="rumah_id"
                   value={formData.rumah_id}
                   onChange={handleInputChange}
-                  className="w-full border border-border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary dark:bg-darksecondary dark:text-white"
+                  className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                 >
-                  <option value="" disabled>
+                  <option value="" disabled className="bg-background text-muted-foreground">
                     -- Pilih Rumah --
                   </option>
                   {dataRumah.map((rumah) => (
-                    <option key={rumah.id} value={rumah.id}>
+                    <option
+                      key={rumah.id}
+                      value={rumah.id}
+                      className="bg-background text-foreground"
+                    >
                       {rumah.nomor_rumah} -{' '}
                       {rumah.penghuniAktif?.penghuni?.nama_lengkap || 'Unknown'}
                     </option>
@@ -254,10 +334,14 @@ const PenerimaanIuran = () => {
                     name="jenis_iuran"
                     value={formData.jenis_iuran}
                     onChange={handleInputChange}
-                    className="w-full border border-border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary dark:bg-darksecondary dark:text-white"
+                    className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                   >
-                    <option value="Satpam">Satpam (Rp 100.000)</option>
-                    <option value="Kebersihan">Kebersihan (Rp 15.000)</option>
+                    <option value="Satpam" className="bg-background text-foreground">
+                      Satpam (Rp 100.000)
+                    </option>
+                    <option value="Kebersihan" className="bg-background text-foreground">
+                      Kebersihan (Rp 15.000)
+                    </option>
                   </select>
                 </div>
                 <div>
@@ -268,15 +352,18 @@ const PenerimaanIuran = () => {
                     name="skema_bayar"
                     value={formData.skema_bayar}
                     onChange={handleInputChange}
-                    className="w-full border border-border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary dark:bg-darksecondary dark:text-white"
+                    className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                   >
-                    <option value="Bulanan">Per Bulan</option>
-                    <option value="Tahunan">Setahun Penuh (12 Bulan)</option>
+                    <option value="Bulanan" className="bg-background text-foreground">
+                      Per Bulan
+                    </option>
+                    <option value="Tahunan" className="bg-background text-foreground">
+                      Setahun Penuh (12 Bulan)
+                    </option>
                   </select>
                 </div>
               </div>
 
-              {/* Tampilkan Pilihan Bulan HANYA jika Skema Bayarnya Bulanan */}
               {formData.skema_bayar === 'Bulanan' && (
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-foreground mb-1">
@@ -286,10 +373,14 @@ const PenerimaanIuran = () => {
                     name="bulan"
                     value={formData.bulan}
                     onChange={handleInputChange}
-                    className="w-full border border-border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary dark:bg-darksecondary dark:text-white"
+                    className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                   >
                     {namaBulan.map((bulan, index) => (
-                      <option key={index} value={index + 1}>
+                      <option
+                        key={index}
+                        value={index + 1}
+                        className="bg-background text-foreground"
+                      >
                         {bulan}
                       </option>
                     ))}
@@ -305,12 +396,12 @@ const PenerimaanIuran = () => {
                   <input
                     type="number"
                     required
-                    name="tahun"
                     min="2020"
                     max="2100"
+                    name="tahun"
                     value={formData.tahun}
                     onChange={handleInputChange}
-                    className="w-full border border-border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary dark:bg-darksecondary dark:text-white"
+                    className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                   />
                 </div>
                 <div>
@@ -323,7 +414,7 @@ const PenerimaanIuran = () => {
                     name="tanggal_bayar"
                     value={formData.tanggal_bayar}
                     onChange={handleInputChange}
-                    className="w-full border border-border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary dark:bg-darksecondary dark:text-white"
+                    className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                   />
                 </div>
               </div>
@@ -333,10 +424,48 @@ const PenerimaanIuran = () => {
                   Batal
                 </Button>
                 <Button type="submit" disabled={isSubmitting || !formData.rumah_id}>
-                  {isSubmitting ? 'Memproses...' : 'Simpan Pembayaran'}
+                  {isSubmitting ? 'Memproses...' : isEditMode ? 'Update Data' : 'Simpan Pembayaran'}
                 </Button>
               </div>
             </form>
+          </CardBox>
+        </div>
+      )}
+
+      {/* === MODAL HAPUS TRANSAKSI === */}
+      {isDeleteModalOpen && deleteData && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <CardBox className="w-full max-w-sm p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex flex-col items-center text-center">
+              <div className="h-12 w-12 rounded-full bg-error/10 flex items-center justify-center mb-4">
+                <Icon icon="solar:trash-bin-trash-bold-duotone" className="text-2xl text-error" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-1">Hapus Transaksi?</h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Yakin ingin membatalkan dan menghapus iuran{' '}
+                <strong>{deleteData.jenis_iuran}</strong> untuk rumah{' '}
+                <strong>{deleteData.rumah?.nomor_rumah}</strong>? Laporan keuangan otomatis akan
+                berkurang.
+              </p>
+
+              <div className="flex w-full gap-3">
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setIsDeleteModalOpen(false)}
+                  disabled={isDeleting}
+                >
+                  Batal
+                </Button>
+                <Button
+                  className="w-full bg-error hover:bg-error/90 text-white"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Menghapus...' : 'Ya, Hapus'}
+                </Button>
+              </div>
+            </div>
           </CardBox>
         </div>
       )}

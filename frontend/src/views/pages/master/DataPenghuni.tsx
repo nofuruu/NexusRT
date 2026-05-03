@@ -16,6 +16,11 @@ const DataPenghuni = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [modalError, setModalError] = useState('');
 
+  // === STATE UNTUK MODAL HAPUS ===
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [penghuniToDelete, setPenghuniToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // State Form Input
   const [formData, setFormData] = useState({
     nama_lengkap: '',
@@ -92,6 +97,28 @@ const DataPenghuni = () => {
     }
   };
 
+  // === FUNGSI HAPUS PENGHUNI ===
+  const handleOpenDeleteModal = (penghuni) => {
+    setPenghuniToDelete(penghuni);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeletePenghuni = async () => {
+    if (!penghuniToDelete) return;
+    setIsDeleting(true);
+    try {
+      await axiosInstance.delete(`/penghuni/${penghuniToDelete.id}`);
+      setIsDeleteModalOpen(false);
+      setPenghuniToDelete(null);
+      fetchPenghuni();
+    } catch (error) {
+      console.error('Gagal menghapus penghuni:', error);
+      alert(error.response?.data?.message || 'Penghuni ini tidak bisa dihapus karena masih menempati rumah atau memiliki histori transaksi.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 gap-6 relative">
       <CardBox className="p-0 overflow-hidden">
@@ -139,7 +166,7 @@ const DataPenghuni = () => {
                 dataPenghuni.map((penghuni, index) => (
                   <tr key={penghuni.id} className="hover:bg-muted/50 transition-colors">
                     <td className="px-6 py-4 text-sm text-foreground">{index + 1}</td>
-                    <td className="px-6 py-4 text-sm font-medium text-foreground dark:text-white">
+                    <td className="px-6 py-4 text-sm font-medium text-foreground">
                       {penghuni.nama_lengkap}
                     </td>
                     <td className="px-6 py-4">
@@ -153,9 +180,27 @@ const DataPenghuni = () => {
                     <td className="px-6 py-4 text-sm text-foreground">
                       {penghuni.sudah_menikah ? 'Sudah Menikah' : 'Belum Menikah'}
                     </td>
-                    <td className="px-6 py-4 text-sm flex justify-center gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleOpenEditModal(penghuni)} title="Edit Data">
-                        <Icon icon="solar:pen-linear" width="16" /> Edit
+                    <td className="px-6 py-4 text-sm flex justify-center gap-1">
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="text-primary hover:bg-primary/10" 
+                        onClick={() => handleOpenEditModal(penghuni)} 
+                        title="Edit Data"
+                      >
+                        <Icon icon="solar:pen-linear" width="18" />
+                      </Button>
+                      
+                      <div className="w-px h-6 bg-border mx-1 self-center"></div>
+                      
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="text-error hover:bg-error/10" 
+                        onClick={() => handleOpenDeleteModal(penghuni)} 
+                        title="Hapus Data"
+                      >
+                        <Icon icon="solar:trash-bin-trash-outline" width="18" />
                       </Button>
                     </td>
                   </tr>
@@ -166,9 +211,10 @@ const DataPenghuni = () => {
         </div>
       </CardBox>
 
+      {/* MODAL TAMBAH & EDIT PENGHUNI */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <CardBox className="w-full max-w-lg p-6 shadow-xl max-h-[90vh] overflow-y-auto">
+          <CardBox className="w-full max-w-lg p-6 shadow-xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-foreground">
                 {isEditMode ? 'Edit Data Penghuni' : 'Tambah Penghuni Baru'}
@@ -187,7 +233,7 @@ const DataPenghuni = () => {
                 <input
                   type="text" required name="nama_lengkap"
                   value={formData.nama_lengkap} onChange={handleInputChange}
-                  className="w-full border border-border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary dark:bg-darksecondary dark:text-white"
+                  className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                 />
               </div>
 
@@ -197,7 +243,7 @@ const DataPenghuni = () => {
                   type="text" required name="nomor_telepon"
                   placeholder="Contoh: 08123456789"
                   value={formData.nomor_telepon} onChange={handleInputChange}
-                  className="w-full border border-border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary dark:bg-darksecondary dark:text-white"
+                  className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                 />
               </div>
 
@@ -206,10 +252,10 @@ const DataPenghuni = () => {
                   <label className="block text-sm font-medium text-foreground mb-1">Status Menetap <span className="text-error">*</span></label>
                   <select
                     name="status_menetap" value={formData.status_menetap} onChange={handleInputChange}
-                    className="w-full border border-border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary dark:bg-darksecondary dark:text-white"
+                    className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                   >
-                    <option value="Tetap">Warga Tetap</option>
-                    <option value="Kontrak">Kontrak / Sementara</option>
+                    <option value="Tetap" className="bg-background text-foreground">Warga Tetap</option>
+                    <option value="Kontrak" className="bg-background text-foreground">Kontrak / Sementara</option>
                   </select>
                 </div>
 
@@ -217,10 +263,10 @@ const DataPenghuni = () => {
                   <label className="block text-sm font-medium text-foreground mb-1">Status Pernikahan <span className="text-error">*</span></label>
                   <select
                     name="sudah_menikah" value={formData.sudah_menikah} onChange={handleInputChange}
-                    className="w-full border border-border rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-primary dark:bg-darksecondary dark:text-white"
+                    className="w-full border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary bg-background text-foreground"
                   >
-                    <option value={0}>Belum Menikah</option>
-                    <option value={1}>Sudah Menikah</option>
+                    <option value={0} className="bg-background text-foreground">Belum Menikah</option>
+                    <option value={1} className="bg-background text-foreground">Sudah Menikah</option>
                   </select>
                 </div>
               </div>
@@ -232,6 +278,32 @@ const DataPenghuni = () => {
                 </Button>
               </div>
             </form>
+          </CardBox>
+        </div>
+      )}
+
+      {/* MODAL HAPUS PENGHUNI */}
+      {isDeleteModalOpen && penghuniToDelete && (
+        <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <CardBox className="w-full max-w-sm p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
+            <div className="flex flex-col items-center text-center">
+              <div className="h-12 w-12 rounded-full bg-error/10 flex items-center justify-center mb-4">
+                <Icon icon="solar:trash-bin-trash-bold-duotone" className="text-2xl text-error" />
+              </div>
+              <h3 className="text-lg font-bold text-foreground mb-1">Hapus Penghuni?</h3>
+              <p className="text-sm text-muted-foreground mb-6">
+                Yakin ingin menghapus data <strong>{penghuniToDelete.nama_lengkap}</strong>?
+              </p>
+              
+              <div className="flex w-full gap-3">
+                <Button variant="outline" className="w-full" onClick={() => setIsDeleteModalOpen(false)} disabled={isDeleting}>
+                  Batal
+                </Button>
+                <Button className="w-full bg-error hover:bg-error/90 text-white" onClick={handleDeletePenghuni} disabled={isDeleting}>
+                  {isDeleting ? 'Menghapus...' : 'Ya, Hapus'}
+                </Button>
+              </div>
+            </div>
           </CardBox>
         </div>
       )}

@@ -141,7 +141,6 @@ const Header = () => {
                     </span>
                   </div>
                 )}
-                <Messages />
                 <Profile />
               </div>
             </div>
