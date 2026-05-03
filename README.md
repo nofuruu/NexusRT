@@ -468,31 +468,23 @@ frontend/resources/
 - **Vite**: Build tool dan dev server
 - **Axios** atau **Fetch API**: HTTP client untuk API calls
 - **Tailwind CSS** atau **CSS Modules**: Styling
-- **Chart.js** atau **Recharts**: Visualisasi data dan grafik
-- **React Hook Form**: Form management
-- **Zustand** atau **Redux**: State management (optional)
 
 ### Halaman Frontend yang Akan Dibangun
 
 #### 1. **Halaman Autentikasi**
 - Login page
 - Register page (jika diperlukan)
-- Forgot password page
 
 #### 2. **Dashboard**
 - Ringkasan keuangan bulan ini
 - Quick stats (Total pendapatan, pengeluaran, saldo)
 - Grafik trend keuangan
-- Notifikasi pembayaran tertunggak
-- Quick actions (Catat pembayaran, tambah penghuni, dll)
 
 #### 3. **Halaman Manajemen Penghuni** (`/residents`)
 - Tabel daftar penghuni
 - Form tambah penghuni
 - Form edit penghuni
 - Modal lihat detail penghuni
-- Upload/preview foto KTP
-- Filter dan search
 
 #### 4. **Halaman Manajemen Rumah** (`/houses`)
 - Tabel daftar rumah
@@ -500,8 +492,6 @@ frontend/resources/
 - Form edit rumah
 - Modal lihat detail rumah
 - Assign/unassign penghuni
-- Tab untuk melihat riwayat penghuni
-- Tab untuk melihat riwayat pembayaran
 
 #### 5. **Halaman Manajemen Pembayaran** (`/payments`)
 - Form pencatatan pembayaran
@@ -510,28 +500,6 @@ frontend/resources/
 - Export pembayaran ke Excel/PDF
 - Dashboard pembayaran tertunggak
 
-#### 6. **Halaman Laporan Keuangan** (`/reports`)
-- **Tab Summary Report**:
-  - Dropdown tahun untuk memilih periode
-  - Grafik line chart pemasukan vs pengeluaran (12 bulan)
-  - Statistik pembayaran
-  - Export laporan
-  
-- **Tab Detail Report**:
-  - Dropdown bulan untuk memilih periode detail
-  - Detail pemasukan (breakdown per jenis iuran)
-  - Detail pengeluaran (breakdown per kategori)
-  - Pie chart komposisi pengeluaran
-  - Table detail pengeluaran
-  - Export ke PDF
-
-#### 7. **Halaman Pengaturan** (`/settings`)
-- Data perumahan (Nama, alamat, foto)
-- Kategori pengeluaran management
-- User management (untuk admin tambahan)
-- Backup & restore data
-
----
 
 ## 🗄️ Dokumentasi Backend
 
@@ -552,7 +520,6 @@ Dokumentasi lengkap backend akan ditambahkan setelah:
 - **Expenses** (Pengeluaran)
 - **Expense Categories** (Kategori pengeluaran)
 - **Users** (Admin/RT)
-- **Payment Methods** (Metode pembayaran)
 
 ### API Documentation
 
@@ -600,76 +567,9 @@ USERS (Admin/RT)
 7. `payment_types` - Jenis iuran (Satpam/Kebersihan)
 8. `payment_methods` - Metode pembayaran
 9. `expenses` - Pengeluaran
-10. `expense_categories` - Kategori pengeluaran
+
 
 ---
-
-## 📝 Catatan Pengembangan
-
-### Backend (TODO)
-
-```
-Priority: HIGH
-- [ ] Create database migrations
-- [ ] Create Eloquent models
-- [ ] Implement API controllers
-- [ ] Setup authentication (Laravel Sanctum)
-- [ ] Implement authorization (Policies)
-- [ ] Add validation rules
-- [ ] Add file upload handling
-- [ ] Add API error handling
-
-Priority: MEDIUM
-- [ ] Setup API documentation
-- [ ] Add unit tests
-- [ ] Add feature tests
-- [ ] Implement pagination
-- [ ] Add API rate limiting
-
-Priority: LOW
-- [ ] Setup logging
-- [ ] Add caching layer
-- [ ] Optimize queries
-```
-
-### Frontend (TODO)
-
-```
-Priority: HIGH
-- [ ] Setup authentication flow
-- [ ] Create layout components
-- [ ] Create resident management pages
-- [ ] Create house management pages
-- [ ] Create payment management pages
-- [ ] Create report pages
-
-Priority: MEDIUM
-- [ ] Setup state management
-- [ ] Add error handling
-- [ ] Add loading states
-- [ ] Implement form validation
-- [ ] Add confirmation dialogs
-
-Priority: LOW
-- [ ] Add animations
-- [ ] Optimize performance
-- [ ] Add PWA support
-- [ ] Add offline support
-```
-
----
-
-## 🔒 Security Considerations
-
-- [ ] Implement CSRF protection
-- [ ] Validate all user inputs
-- [ ] Use prepared statements (SQL injection prevention)
-- [ ] Implement rate limiting
-- [ ] Use HTTPS in production
-- [ ] Implement proper authentication & authorization
-- [ ] Sanitize file uploads
-- [ ] Add audit logging
-
 
 ## 📄 Lisensi
 
